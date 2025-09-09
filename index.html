@@ -83,7 +83,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Quiz: Metodología – Guía de Observación</h1>
-          <div class="muted">Responde rápido, suma racha, gana XP y desbloquea insignias. Confeti por aciertos ✨</div>
+          <div class="muted"> ✨</div>
         </div>
       </div>
       <button class="pill" id="btnHow">¿Cómo jugar?</button>
@@ -91,25 +91,12 @@
 
     <div class="card" id="quiz"></div>
 
-    <div class="card">
-      <div class="timer" aria-label="Tiempo por pregunta">
-        <div class="bar" id="timebar"></div>
-      </div>
-      <div class="progress" aria-label="Progreso">
-        <div class="bar" id="bar"></div>
-      </div>
-    </div>
 
-    <div class="card hud grid">
+    <div class="card hud">
       <div class="stat"><span>✅ Correctas:</span><span class="v" id="statCorrect">0</span>/<span id="statTotal">0</span></div>
-      <div class="stat"><span class="streak">🔥 Racha:</span><span class="v" id="statStreak">0</span><span id="multiplier" class="muted">(x1)</span></div>
-      <div class="stat"><span class="life">❤ Vidas:</span><span class="v" id="statLives">3</span></div>
-      <div class="stat"><span class="xp">⭐ XP:</span><span class="v" id="statXP">0</span> · <span>Lvl</span> <span class="v" id="statLevel">1</span></div>
-      <div class="badges" id="badges"></div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
         <button class="pill primary" id="btnReset">Reiniciar</button>
         <button class="pill warn" id="btnShuffle">Barajar preguntas</button>
-        <button class="pill" id="btnSound">🔊 Sonido: ON</button>
       </div>
     </div>
   </div>
@@ -120,11 +107,11 @@
     <div class="panel">
       <h3>Cómo jugar</h3>
       <ul>
-        <li>Tienes <b>20 s</b> por pregunta. Respuestas rápidas → más <b>XP</b>.</li>
-        <li>Encadena aciertos para subir la <b>racha</b> y activar <b>multiplicador</b> (x1 → x3).</li>
-        <li>Empiezas con <b>3 vidas</b>. Al fallar, pierdes 1 vida y se reinicia la racha.</li>
-        <li>Gana <b>insignias</b>: Perfecto, Velocidad, Resiliencia, Maestro de Taxonomía de Bloom.</li>
+        <li>Lee cada pregunta y selecciona tu respuesta.</li>
+        <li>Ve el feedback y la explicación de la respuesta correcta.</li>
+        <li>Haz clic en <b>"Siguiente"</b> cuando estés listo para continuar.</li>
         <li>Puedes <b>barajar</b> el orden de las preguntas y <b>reiniciar</b> cuando quieras.</li>
+        <li>¡Disfruta del confetti cuando aciertes! ✨</li>
       </ul>
       <div style="display:flex;justify-content:flex-end"><button class="pill primary" id="closeHow">¡A jugar!</button></div>
     </div>
@@ -132,9 +119,8 @@
 
   <div class="modal" id="modalEnd">
     <div class="panel">
-      <h3>¡Resultados!</h3>
+      <h3>¡Quiz completado!</h3>
       <p><span id="summary"></span></p>
-      <div class="badges" id="earned"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
         <button class="pill" id="again">Volver a intentar</button>
         <button class="pill primary" id="shuffleAgain">Reiniciar + Barajar</button>
@@ -163,85 +149,31 @@
     { type:'tf', title:'CLIL consiste en enseñar gramática explícita antes de un contenido.', correct:false, explain:'Falso: CLIL = aprender lengua a través de contenidos (ciencias, geografía), priorizando la comunicación.', tag:'meth' }
   ];
 
-  // ---------- Estado y parámetros de juego ----------
-  const TIME_LIMIT = 20; // s por pregunta
-  const LIVES_INIT = 3;
-  const STREAK_TIERS = [0,3,5]; // x1, x2, x3
-  const XP_BASE = 100; // máximo por pregunta si se contesta al instante
-
+  // ---------- Estado simplificado ----------
   let QUESTIONS = [];
   let state = {
     answered: [],
     correctCount: 0,
-    streak: 0,
-    lives: LIVES_INIT,
-    xp: 0,
-    level: 1,
-    timeLeft: TIME_LIMIT,
-    idx: 0,
-    badges: new Set(),
-    fastest: Infinity,
-    wrongs: 0
+    idx: 0
   };
 
   // ---------- Utilidades ----------
   const $ = sel => document.querySelector(sel);
   const elQuiz = $('#quiz');
-  const elBar = $('#bar');
-  const elTimebar = $('#timebar');
   const elConfetti = $('#confetti');
   const statCorrect = $('#statCorrect');
   const statTotal = $('#statTotal');
-  const statStreak = $('#statStreak');
-  const statLives = $('#statLives');
-  const statXP = $('#statXP');
-  const statLevel = $('#statLevel');
-  const elBadges = $('#badges');
   const btnReset = $('#btnReset');
   const btnShuffle = $('#btnShuffle');
-  const btnSound = $('#btnSound');
   const btnHow = $('#btnHow');
   const modalHow = $('#modalHow');
   const closeHow = $('#closeHow');
   const modalEnd = $('#modalEnd');
   const summary = $('#summary');
-  const earned = $('#earned');
   const again = $('#again');
   const shuffleAgain = $('#shuffleAgain');
 
-  let tick = null;
-
   function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]} return a }
-  function clamp(n,min,max){ return Math.min(max,Math.max(min,n)) }
-
-  function currentMultiplier(){
-    const s = state.streak;
-    if(s>=STREAK_TIERS[2]) return 3; // x3
-    if(s>=STREAK_TIERS[1]) return 2; // x2
-    return 1; // x1
-  }
-
-  function xpForAnswer(seconds){
-    // Lineal: más rápido → más XP. Nunca < 20 XP
-    const frac = clamp((TIME_LIMIT - seconds)/TIME_LIMIT, 0, 1);
-    return Math.round((XP_BASE * (1 - frac)) * currentMultiplier()) + 20;
-  }
-
-  function levelForXP(xp){ return 1 + Math.floor(xp / 800); }
-
-  function addBadge(key){ if(state.badges.has(key)) return; state.badges.add(key); renderBadges(); }
-  function renderBadges(){
-    elBadges.innerHTML = '';
-    const map = {
-      perfect:['🏅','Perfecto: todas correctas'],
-      speedster:['⚡','Velocidad: respuesta < 5s'],
-      resilient:['🛡️','Resiliencia: fallaste y te recuperaste a racha ≥3'],
-      bloom:['🧠','Maestro de Taxonomía de Bloom: acertaste todas las de Taxonomía de Bloom']
-    };
-    state.badges.forEach(k=>{
-      const b=document.createElement('div'); b.className='badge-chip'; b.innerHTML=`<span>${map[k][0]}</span><span class="muted">${map[k][1]}</span>`; elBadges.appendChild(b);
-    })
-  }
 
   function confettiBurst(nBase=28){
     const colors = ['#ffff00','#ff69b4','#00bfff','#00ff00','#ffd700','#ff1493'];
@@ -257,28 +189,21 @@
     }
   }
 
-  function startTimer(){ stopTimer(); state.timeLeft = TIME_LIMIT; updateTimebar(); tick = setInterval(()=>{ state.timeLeft = clamp(state.timeLeft - 0.25, 0, TIME_LIMIT); updateTimebar(); if(state.timeLeft<=0){ stopTimer(); autoFail(); } }, 250); }
-  function stopTimer(){ if(tick) { clearInterval(tick); tick=null; } }
-  function updateTimebar(){ elTimebar.style.width = (state.timeLeft/TIME_LIMIT*100)+'%'; }
-
   function reset(shuffleFirst=false){
     QUESTIONS = QUESTIONS_BASE.slice();
     if(shuffleFirst) shuffle(QUESTIONS);
-    state = { answered:Array(QUESTIONS.length).fill(null), correctCount:0, streak:0, lives:LIVES_INIT, xp:0, level:1, timeLeft:TIME_LIMIT, idx:0, badges:new Set(), fastest:Infinity, wrongs:0 };
+    state = { answered:Array(QUESTIONS.length).fill(null), correctCount:0, idx:0 };
     statTotal.textContent = QUESTIONS.length;
     render();
-    startTimer();
     modalEnd.classList.remove('show');
   }
 
   function render(){
-    statCorrect.textContent = state.correctCount; statStreak.textContent = state.streak; statLives.textContent = state.lives; statXP.textContent = state.xp; statLevel.textContent = state.level;
-    $('#multiplier').textContent = '(' + 'x' + currentMultiplier() + ')';
-    elBar.style.width = ((state.idx)/QUESTIONS.length*100)+'%';
+    statCorrect.textContent = state.correctCount;
 
     elQuiz.innerHTML='';
     const i = state.idx;
-    if(i>=QUESTIONS.length || state.lives<=0){ return endGame(); }
+    if(i>=QUESTIONS.length){ return endGame(); }
     const q = QUESTIONS[i];
 
     const card = document.createElement('div'); card.className='q-card card';
@@ -301,21 +226,12 @@
 
   function answer(i, val){
     if(state.answered[i]!==null) return; // ya respondida
-    stopTimer();
     const q = QUESTIONS[i];
     const correct = (q.type==='mc') ? val===q.correct : val===q.correct;
 
-    const elapsed = TIME_LIMIT - state.timeLeft;
     if(correct){
-      const gain = xpForAnswer(elapsed);
-      state.xp += gain; state.level = levelForXP(state.xp);
-      state.correctCount++; state.streak++;
-      state.fastest = Math.min(state.fastest, elapsed);
-      if(elapsed <= 5) addBadge('speedster');
-      if(q.tag==='bloom') trackBloom();
-      SFX.beep(true); confettiBurst(32 + state.streak*2);
-    } else {
-      state.wrongs++; state.lives = Math.max(0, state.lives-1); if(state.streak>=3) addBadge('resilient'); state.streak = 0; SFX.beep(false);
+      state.correctCount++;
+      confettiBurst(32);
     }
 
     // marcar visualmente opciones
@@ -336,41 +252,24 @@
     // feedback
     const fb = document.createElement('div'); fb.className = 'feedback ' + (correct? 'ok':'err'); fb.textContent = (correct? '¡Correcto! ' : 'Respuesta incorrecta. ') + q.explain; elQuiz.querySelector('.q-card').appendChild(fb);
 
-    // siguiente
-    const delay = correct ? 850 : 7000; // Más tiempo para respuestas incorrectas
-    setTimeout(()=>{ state.answered[i]=val; state.idx++; updateHUD(); render(); startTimer(); }, delay);
-  }
-
-  function trackBloom(){
-    // si todas las preguntas con tag bloom fueron correctas, se otorga al final
-  }
-
-  function updateHUD(){
-    statCorrect.textContent = state.correctCount; statStreak.textContent = state.streak; statLives.textContent = state.lives; statXP.textContent = state.xp; statLevel.textContent = state.level;
-    $('#multiplier').textContent = '(' + 'x' + currentMultiplier() + ')';
-    renderBadges();
-  }
-
-  function autoFail(){
-    // se considera incorrecta por tiempo
-    answer(state.idx, '__timeout__');
+    // botón siguiente
+    const nextBtn = document.createElement('button'); 
+    nextBtn.className = 'pill primary'; 
+    nextBtn.textContent = 'Siguiente →'; 
+    nextBtn.style.marginTop = '16px';
+    nextBtn.addEventListener('click', ()=> {
+      state.answered[i]=val; 
+      state.idx++; 
+      render();
+    });
+    elQuiz.querySelector('.q-card').appendChild(nextBtn);
   }
 
   function endGame(){
-    stopTimer();
-    // Insignias finales
-    if(state.correctCount === QUESTIONS.length) addBadge('perfect');
-    const bloomQs = QUESTIONS.filter(q=>q.tag==='bloom').length;
-    const bloomCorrect = QUESTIONS.map((q,i)=> q.tag==='bloom' && state.answered[i]!==null && ((q.type==='mc' && state.answered[i]===q.correct) || (q.type==='tf' && state.answered[i]===q.correct))).filter(Boolean).length;
-    if(bloomQs>0 && bloomCorrect===bloomQs) addBadge('bloom');
-
-    // Resumen
+    // Resumen simplificado
     const pct = Math.round(state.correctCount / QUESTIONS.length * 100);
-    let title = pct===100? '¡Impecable!': pct>=80? '¡Gran trabajo!': pct>=50? 'Buen intento': 'Toca repasar';
-    summary.innerHTML = `<b>${title}</b><br>Correctas: <b>${state.correctCount}/${QUESTIONS.length}</b> · Vidas restantes: <b>${state.lives}</b><br>XP: <b>${state.xp}</b> · Nivel: <b>${state.level}</b>${Number.isFinite(state.fastest)? `<br>Respuesta más rápida: <b>${state.fastest.toFixed(1)}s</b>`:''}`;
-
-    earned.innerHTML='';
-    state.badges.forEach(k=>{ const el=document.createElement('div'); el.className='badge-chip'; el.innerHTML = k==='perfect'? '🏅 Perfecto' : k==='speedster'? '⚡ Velocidad' : k==='resilient'? '🛡️ Resiliencia' : '🧠 Maestro de Taxonomía de Bloom'; earned.appendChild(el); });
+    let title = pct===100? '¡Perfecto!': pct>=80? '¡Excelente!': pct>=60? '¡Bien hecho!': '¡Sigue practicando!';
+    summary.innerHTML = `<b>${title}</b><br>Respuestas correctas: <b>${state.correctCount}/${QUESTIONS.length}</b> (${pct}%)`;
 
     modalEnd.classList.add('show');
     if(pct>=80) confettiBurst(60);
@@ -383,7 +282,6 @@
   closeHow.addEventListener('click', ()=> modalHow.classList.remove('show'));
   again.addEventListener('click', ()=> { reset(false); modalEnd.classList.remove('show'); });
   shuffleAgain.addEventListener('click', ()=> { reset(true); modalEnd.classList.remove('show'); });
-  btnSound.addEventListener('click', ()=>{ SFX.on=!SFX.on; btnSound.textContent = `🔊 Sonido: ${SFX.on? 'ON':'OFF'}`; });
 
   // ---------- Inicio ----------
   reset(false);
