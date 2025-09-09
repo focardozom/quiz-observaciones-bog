@@ -89,6 +89,17 @@
       <button class="pill" id="btnHow">¿Cómo jugar?</button>
     </div>
 
+    <div class="card" id="quiz"></div>
+
+    <div class="card">
+      <div class="timer" aria-label="Tiempo por pregunta">
+        <div class="bar" id="timebar"></div>
+      </div>
+      <div class="progress" aria-label="Progreso">
+        <div class="bar" id="bar"></div>
+      </div>
+    </div>
+
     <div class="card hud grid">
       <div class="stat"><span>✅ Correctas:</span><span class="v" id="statCorrect">0</span>/<span id="statTotal">0</span></div>
       <div class="stat"><span class="streak">🔥 Racha:</span><span class="v" id="statStreak">0</span><span id="multiplier" class="muted">(x1)</span></div>
@@ -99,17 +110,6 @@
         <button class="pill primary" id="btnReset">Reiniciar</button>
         <button class="pill warn" id="btnShuffle">Barajar preguntas</button>
         <button class="pill" id="btnSound">🔊 Sonido: ON</button>
-      </div>
-    </div>
-
-    <div class="card" id="quiz"></div>
-
-    <div class="card">
-      <div class="timer" aria-label="Tiempo por pregunta">
-        <div class="bar" id="timebar"></div>
-      </div>
-      <div class="progress" aria-label="Progreso">
-        <div class="bar" id="bar"></div>
       </div>
     </div>
   </div>
