@@ -6,53 +6,56 @@
   <title>Quiz: Metodología – Guía de Observación</title>
   <style>
     :root{
-      --bg:#0b1020; --card:#111736; --ink:#e6ecff; --muted:#aab3d6;
-      --accent:#6ee7b7; --accent-2:#60a5fa; --danger:#f87171; --ok:#34d399; --warn:#f59e0b;
-      --gold:#fbbf24; --violet:#a78bfa; --pink:#f472b6; --sky:#60a5fa;
+      --bg:#1a1a2e; --card:#0f0f23; --ink:#ffff00; --muted:#ff69b4;
+      --accent:#ff69b4; --accent-2:#00bfff; --danger:#ff1493; --ok:#00ff00; --warn:#ffff00;
+      --gold:#ffff00; --violet:#ff69b4; --pink:#ff69b4; --sky:#00bfff;
+      --pacman-yellow:#ffff00; --pacman-pink:#ff69b4; --pacman-blue:#00bfff; --pacman-green:#00ff00;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;color:var(--ink);background:
-      radial-gradient(1200px 800px at 80% -10%, #1b255a33, transparent),
-      radial-gradient(1400px 900px at 0% 110%, #0ea5e955, transparent),var(--bg);
+      radial-gradient(1200px 800px at 80% -10%, #ffff0022, transparent),
+      radial-gradient(1400px 900px at 0% 110%, #ff69b411, transparent),
+      radial-gradient(800px 600px at 50% 50%, #00bfff15, transparent),
+      linear-gradient(180deg, #1a1a2e 0%, #0f0f23 50%, #1a1a2e 100%);
       display:flex;align-items:stretch;justify-content:center;padding:24px}
     .app{width:min(980px,100%);margin:auto}
     .header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
     .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:44px;height:44px;border-radius:12px;background:conic-gradient(from 220deg,#22d3ee,#3b82f6 35%,#8b5cf6 70%,#22d3ee);box-shadow:0 10px 30px #1118;position:relative}
-    .logo:after{content:"";position:absolute;inset:6px;border-radius:10px;background:radial-gradient(circle at 30% 30%,#fff8,transparent 40%),#0ea5e9;mix-blend:overlay}
-    h1{font-size:clamp(1.1rem,2vw + .6rem,1.6rem);margin:0}
+    .logo{width:44px;height:44px;border-radius:12px;background:conic-gradient(from 220deg,#ffff00,#ff69b4 35%,#00bfff 70%,#00ff00);box-shadow:0 10px 30px rgba(255,255,0,0.4);position:relative}
+    .logo:after{content:"";position:absolute;inset:6px;border-radius:10px;background:radial-gradient(circle at 30% 30%,#fff8,transparent 40%),#ffff00;mix-blend:overlay}
+    h1{font-size:clamp(1.1rem,2vw + .6rem,1.6rem);margin:0;color:var(--ink);text-shadow:1px 1px 2px rgba(255,255,255,0.5)}
     .muted{color:var(--muted);font-size:.9rem}
-    .card{background:linear-gradient(180deg,#0b1333,#0b1333dd 60%,#0b133380);border:1px solid #2a3566;border-radius:18px;padding:18px;box-shadow:0 10px 30px #0006}
+    .card{background:linear-gradient(180deg,#0f0f23,#0f0f23dd 60%,#0f0f2380);border:2px solid #ffff00;border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(255,255,0,0.3)}
 
     .hud{display:grid;grid-template-columns:1.1fr auto auto auto;gap:10px;align-items:center}
-    .pill{all:unset;cursor:pointer;padding:10px 14px;border-radius:999px;background:#1f2a5a;border:1px solid #2a3566}
-    .pill.primary{background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;border:none}
-    .pill.warn{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#111}
+    .pill{all:unset;cursor:pointer;padding:10px 14px;border-radius:999px;background:#00bfff;border:2px solid #ffff00;color:#1a1a2e;font-weight:600}
+    .pill.primary{background:linear-gradient(135deg,#ff69b4,#ff1493);color:#ffff00;border:2px solid #ffff00;font-weight:700}
+    .pill.warn{background:linear-gradient(135deg,#ffff00,#ffd700);color:#1a1a2e;border:2px solid #ff69b4;font-weight:700}
 
-    .stat{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:#0f163a;border:1px solid #2a3566}
-    .stat .v{font-weight:700}
-    .life{color:#ef4444}
-    .xp{color:#34d399}
-    .streak{color:#fbbf24}
+    .stat{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,#00bfff,#0080ff);border:2px solid #ffff00;color:#1a1a2e}
+    .stat .v{font-weight:700;color:#1a1a2e}
+    .life{color:#ff69b4;font-weight:700}
+    .xp{color:#00ff00;font-weight:700}
+    .streak{color:#ffff00;font-weight:700}
 
-    .q-card{margin:14px 0;position:relative}
-    .q-title{font-weight:700;line-height:1.35}
-    .options{margin-top:10px;display:grid;gap:10px}
-    button.option{all:unset;display:flex;gap:10px;align-items:flex-start;cursor:pointer;border:1px solid #2a3566;background:#0f163a;padding:12px 14px;border-radius:12px;line-height:1.35;position:relative;transition:transform .06s ease,border-color .2s ease,background .2s ease}
-    button.option:hover{transform:translateY(-1px);border-color:#4263eb66}
+    .q-card{margin:14px 0;position:relative;background:linear-gradient(135deg,#ff69b4,#ff1493);border:3px solid #ffff00;border-radius:20px;padding:24px;box-shadow:0 8px 32px rgba(255,105,180,0.4), 0 0 0 1px #ffff00}
+    .q-title{font-weight:700;line-height:1.4;font-size:1.1rem;color:#1a1a2e;margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#ffff00,#ffd700);border-radius:12px;border-left:6px solid #ff69b4;text-shadow:1px 1px 2px rgba(255,255,255,0.3)}
+    .options{margin-top:16px;display:grid;gap:12px}
+    button.option{all:unset;display:flex;gap:12px;align-items:flex-start;cursor:pointer;border:2px solid #ffff00;background:linear-gradient(135deg,#00bfff,#0080ff);padding:16px 18px;border-radius:14px;line-height:1.4;position:relative;transition:all .2s ease;font-size:1rem;color:#1a1a2e;text-shadow:1px 1px 2px rgba(255,255,255,0.3)}
+    button.option:hover{transform:translateY(-2px);border-color:#ffff00;background:linear-gradient(135deg,#00ff00,#00cc00);box-shadow:0 4px 16px rgba(0,255,0,0.4);color:#1a1a2e}
     button.option.correct{border-color:#10b981;background:linear-gradient(180deg,#0f1f2a,#0f2a1a)}
     button.option.wrong{border-color:#ef4444;background:linear-gradient(180deg,#2a0f0f,#1a0f0f)}
-    .badge{min-width:26px;height:26px;border-radius:9px;display:inline-grid;place-items:center;font-weight:800;font-size:.85rem;color:#0b1020;background:#93c5fd}
+    .badge{min-width:32px;height:32px;border-radius:12px;display:inline-grid;place-items:center;font-weight:800;font-size:.9rem;color:#1a1a2e;background:linear-gradient(135deg,#ffff00,#ffd700);border:2px solid #ff69b4;box-shadow:0 2px 8px rgba(255,255,0,0.4);text-shadow:1px 1px 2px rgba(255,255,255,0.3)}
     .feedback{margin-top:10px;padding:10px 12px;border-radius:12px;background:#0e1535;border:1px dashed #2a3566}
     .feedback.ok{border-color:#065f46;background:#0b2a20}
     .feedback.err{border-color:#7f1d1d;background:#2a0b0b}
 
-    .timer{height:12px;background:#0a1233;border:1px solid #2a3566;border-radius:999px;overflow:hidden;margin-top:12px}
-    .timer .bar{height:100%;width:100%;background:linear-gradient(90deg,#34d399,#60a5fa);transition:width .25s linear}
+    .timer{height:12px;background:rgba(15,15,35,0.3);border:2px solid #ffff00;border-radius:999px;overflow:hidden;margin-top:12px;backdrop-filter:blur(10px)}
+    .timer .bar{height:100%;width:100%;background:linear-gradient(90deg,#ffff00,#ff69b4);transition:width .25s linear}
 
-    .progress{margin-top:10px;height:10px;background:#0a1233;border:1px solid #2a3566;border-radius:999px;overflow:hidden}
-    .bar{height:100%;width:0%;background:linear-gradient(90deg,#34d399,#60a5fa)}
+    .progress{margin-top:10px;height:10px;background:rgba(15,15,35,0.3);border:2px solid #ffff00;border-radius:999px;overflow:hidden;backdrop-filter:blur(10px)}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,#00ff00,#00bfff)}
     .score{font-weight:800}
 
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -60,12 +63,12 @@
 
     /* Badges */
     .badges{display:flex;gap:8px;flex-wrap:wrap}
-    .badge-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #2a3566;background:#0f163a}
+    .badge-chip{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:2px solid #fbbf24;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fef3c7;font-weight:600}
 
     /* Modals */
-    .modal{position:fixed;inset:0;display:none;place-items:center;background:#0008}
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,0.8)}
     .modal.show{display:grid}
-    .modal .panel{background:#0f163a;border:1px solid #2a3566;border-radius:16px;padding:18px;max-width:min(680px,92%)}
+    .modal .panel{background:linear-gradient(135deg,#16213e,#1a1a2e);border:2px solid #fbbf24;border-radius:16px;padding:18px;max-width:min(680px,92%);color:#fef3c7}
 
     /* Confetti */
     .confetti{pointer-events:none;position:fixed;inset:0;overflow:hidden}
@@ -241,7 +244,7 @@
   }
 
   function confettiBurst(nBase=28){
-    const colors = ['#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#f87171'];
+    const colors = ['#ffff00','#ff69b4','#00bfff','#00ff00','#ffd700','#ff1493'];
     const n = nBase + Math.floor(Math.random()*12);
     for(let i=0;i<n;i++){
       const p=document.createElement('div'); p.className='piece';
